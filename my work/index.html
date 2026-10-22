@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BuildStock | Hardware Inventory</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div><h1>BuildStock</h1><p>Hardware stock & sales manager</p></div>
+    <span class="status">Demo mode · data saved on this device</span>
+  </header>
+  <main class="container">
+    <section class="stats" aria-label="Inventory summary">
+      <article class="stat"><span>Products</span><strong id="totalProducts">0</strong></article>
+      <article class="stat"><span>Stock units</span><strong id="totalUnits">0</strong></article>
+      <article class="stat"><span>Low stock</span><strong id="lowStock">0</strong></article>
+      <article class="stat"><span>Recorded sales</span><strong id="salesTotal">KSh 0</strong></article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>Add a product</h2><p>Enter the item and its current stock.</p></div></div>
+      <form id="productForm" class="product-form">
+        <label>Product name<input id="productName" required maxlength="80" placeholder="e.g. Cement 50kg"></label>
+        <label>Category
+          <select id="category" required>
+            <option value="">Choose category</option>
+            <option>Cement</option><option>Tools</option><option>Plumbing</option>
+            <option>Electrical</option><option>Paint</option><option>Timber</option>
+            <option>Roofing</option><option>Safety equipment</option><option>Other</option>
+          </select>
+        </label>
+        <label>SKU / code<input id="sku" maxlength="40" placeholder="e.g. CEM-001"></label>
+        <label>Supplier<input id="supplier" maxlength="80" placeholder="Supplier name"></label>
+        <label>Buying price (KSh)<input id="buyPrice" type="number" min="0" step="0.01" required placeholder="0"></label>
+        <label>Selling price (KSh)<input id="sellPrice" type="number" min="0" step="0.01" required placeholder="0"></label>
+        <label>Quantity in stock<input id="quantity" type="number" min="0" step="1" required placeholder="0"></label>
+        <label>Low-stock alert at<input id="reorderLevel" type="number" min="0" step="1" value="5" required></label>
+        <button class="primary" type="submit">Save product</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div><h2>Inventory</h2><p>Search, edit, record sales, or remove items.</p></div>
+        <input id="search" type="search" placeholder="Search product, code, supplier…" aria-label="Search inventory">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Product</th><th>Category</th><th>Code / Supplier</th><th>Buy</th><th>Sell</th><th>Stock</th><th>Actions</th></tr></thead>
+          <tbody id="productRows"></tbody>
+        </table>
+      </div>
+      <p id="emptyMessage" class="empty">No products yet. Add your first product above.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Recent sales</h2>
+      <p>Sales reduce stock and are recorded in this browser.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Product</th><th>Quantity</th><th>Total</th></tr></thead>
+        <tbody id="salesRows"></tbody>
+      </table></div>
+      <p id="noSales" class="empty">No sales recorded yet.</p>
+    </section>
+    <p class="notice">Important: this starter stores data in this browser using localStorage. It is a demo, not a shared online database. Export/back up records before changing devices; connect a secure backend and database before using it for real business records.</p>
+  </main>
+  <footer>BuildStock · Hardware inventory starter</footer>
+</body>
+</html>

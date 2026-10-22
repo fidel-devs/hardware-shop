@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173c2d">
+  <meta name="description" content="Fresh, flavourful meals at Savanna Bites. Browse our menu and order through WhatsApp.">
+  <title>Savanna Bites | Fresh Food, Good Mood</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#home" aria-label="Savanna Bites home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span>Savanna <b>Bites</b><small>FRESH FOOD · GOOD MOOD</small></span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open navigation">☰</button>
+      <nav id="primaryNav" class="primary-nav" aria-label="Main navigation">
+        <a href="#home">Home</a>
+        <a href="#menu">Our menu</a>
+        <a href="#about">Our story</a>
+        <a href="#contact">Contact</a>
+        <a class="nav-order" href="#menu">Order food <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="home">
+      <div class="hero-shade"></div>
+      <div class="container hero-content">
+        <p class="eyebrow light-eyebrow"><span></span> GOOD FOOD, MADE WITH HEART</p>
+        <h1>A little taste of<br><em>something wonderful.</em></h1>
+        <p class="hero-copy">Fresh ingredients, bold flavours and comforting favourites — made for sharing and savouring.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#menu">Explore the menu <span aria-hidden="true">→</span></a>
+          <a class="text-link light-link" href="#about">Get to know us <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="hero-note"><span class="note-icon">✦</span><span><b>Freshly prepared</b><small>Made to order, every day</small></span></div>
+      </div>
+      <div class="hero-stamp" aria-hidden="true"><span>GOOD FOOD</span><b>✳</b><span>GOOD MOOD</span></div>
+    </section>
+
+    <section class="trust-strip" aria-label="Restaurant highlights">
+      <div class="container trust-grid">
+        <div><span class="trust-icon">✦</span><span><b>Fresh ingredients</b><small>Quality in every bite</small></span></div>
+        <div><span class="trust-icon">♡</span><span><b>Made with care</b><small>Food that feels like home</small></span></div>
+        <div><span class="trust-icon">⌁</span><span><b>Easy ordering</b><small>Order directly on WhatsApp</small></span></div>
+      </div>
+    </section>
+
+    <section class="section menu-section" id="menu">
+      <div class="container">
+        <div class="section-heading">
+          <div><p class="eyebrow"><span></span> MADE FRESH FOR YOU</p><h2>Find your <em>favourite.</em></h2></div>
+          <p>From satisfying classics to something a little special, there’s a plate for every craving.</p>
+        </div>
+        <div class="menu-toolbar">
+          <div id="categoryFilters" class="category-filters" aria-label="Filter menu by category">
+            <button class="filter-btn active" data-category="all" aria-pressed="true">All dishes</button>
+            <button class="filter-btn" data-category="mains" aria-pressed="false">Main dishes</button>
+            <button class="filter-btn" data-category="grill" aria-pressed="false">From the grill</button>
+            <button class="filter-btn" data-category="sides" aria-pressed="false">Sides</button>
+            <button class="filter-btn" data-category="drinks" aria-pressed="false">Drinks</button>
+          </div>
+          <label class="search-box"><span aria-hidden="true">⌕</span><input id="menuSearch" type="search" placeholder="Search dishes..." aria-label="Search menu dishes"></label>
+        </div>
+
+        <div class="menu-layout">
+          <div class="menu-main">
+            <p class="results-label" id="resultsLabel" aria-live="polite">Showing all dishes</p>
+            <div class="food-grid" id="foodGrid"></div>
+            <p class="empty-state" id="emptyState" hidden>No dishes found. Try another search or category.</p>
+          </div>
+
+          <aside class="cart-panel" id="cart" aria-labelledby="cartTitle">
+            <div class="cart-title-row"><div><p class="eyebrow">YOUR SELECTION</p><h3 id="cartTitle">Your order <span class="cart-count" id="cartCount">0</span></h3></div><span class="cart-bag" aria-hidden="true">♧</span></div>
+            <div id="cartItems" class="cart-items"><div class="cart-empty"><span>♧</span><b>Your basket is waiting</b><p>Add something delicious from the menu.</p></div></div>
+            <div class="cart-total-row"><span>Subtotal</span><strong id="cartSubtotal">KSh 0</strong></div>
+            <p class="cart-disclaimer">Delivery fees, if applicable, are confirmed separately.</p>
+            <form id="orderForm" class="order-form" novalidate>
+              <label for="customerName">Your name <span>*</span></label>
+              <input id="customerName" name="customerName" autocomplete="name" placeholder="e.g. Alex" required maxlength="60">
+              <small class="field-error" id="nameError"></small>
+              <label for="mpesaPhone">M-Pesa phone number <span>*</span></label>
+              <input id="mpesaPhone" name="mpesaPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX or 2547XXXXXXXX" required>
+              <small class="field-error" id="phoneError"></small>
+              <label for="orderType">How would you like your order? <span>*</span></label>
+              <select id="orderType" name="orderType" required>
+                <option value="Pickup">Pickup</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Dine-in">Dine-in</option>
+              </select>
+              <label for="orderNotes">Notes <small>(optional)</small></label>
+              <textarea id="orderNotes" name="orderNotes" rows="2" maxlength="250" placeholder="Allergies, directions, table number..."></textarea>
+              <button type="submit" class="btn btn-whatsapp" id="whatsappButton"><span aria-hidden="true">◉</span> Pay with M-Pesa <span aria-hidden="true">↗</span></button>
+              <p class="privacy-note">Pay securely using an M-Pesa prompt. After payment is confirmed, WhatsApp will open with your order details.</p>
+              <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+            </form>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section" id="about">
+      <div class="container story-grid">
+        <div class="story-photo"><img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1100&q=85" alt="Warm, welcoming restaurant dining space" loading="lazy"><div class="photo-tag"><b>Made fresh.</b><span>Served with a smile.</span></div></div>
+        <div class="story-copy"><p class="eyebrow"><span></span> A PLACE AT OUR TABLE</p><h2>Good food brings<br>us <em>together.</em></h2><p>At Savanna Bites, we believe a great meal is more than what’s on the plate. It’s the care in the cooking, the freshness of the ingredients and the joy of sharing something delicious.</p><p>Whether you’re grabbing a quick lunch or sitting down with your favourite people, we’re happy to have you here.</p><a href="#contact" class="text-link">Come say hello <span aria-hidden="true">→</span></a></div>
+      </div>
+    </section>
+
+    <section class="visit-section" id="contact">
+      <div class="container visit-grid">
+        <div class="visit-intro"><p class="eyebrow light-eyebrow"><span></span> WE’D LOVE TO SEE YOU</p><h2>Let’s make<br>it a <em>delicious</em> day.</h2><p>Drop by, give us a call or place your order on WhatsApp.</p><a class="btn btn-light" href="#menu">Choose your meal <span aria-hidden="true">→</span></a></div>
+        <div class="visit-card">
+          <div class="visit-detail"><span class="detail-icon">⌖</span><div><h3>Find us</h3><p>123 Market Street, Nakuru, Kenya</p><a href="https://www.google.com/maps/search/?api=1&query=123+Market+Street+Nakuru+Kenya" target="_blank" rel="noopener noreferrer">Get directions ↗</a></div></div>
+          <div class="visit-detail"><span class="detail-icon">◷</span><div><h3>Opening hours</h3><p>Monday – Saturday: 8:00 AM – 9:00 PM</p><p>Sunday: 10:00 AM – 6:00 PM</p></div></div>
+          <div class="visit-detail"><span class="detail-icon">☎</span><div><h3>Talk to us</h3><p>+254 700 000 000</p><a href="tel:+254700000000">Call the restaurant ↗</a></div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="container footer-wrap"><a class="brand footer-brand" href="#home"><span class="brand-mark">S</span><span>Savanna <b>Bites</b><small>FRESH FOOD · GOOD MOOD</small></span></a><p>Made with care. Shared with joy.</p><p>© <span id="year"></span> Savanna Bites. Demo website.</p></div></footer>
+</body>
+</html>

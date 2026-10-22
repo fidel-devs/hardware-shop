@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Hardware Shop Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+
+<body>
+<header>
+  <div class="logo">H</div>
+  <div class="brand">
+    <b>Hardware Shop</b>
+    <small>Inventory & sales manager</small>
+  </div><span id="connection">Connecting…</span>
+</header>
+
+<div class="layout">
+  <nav><button class="active" data-view="dashboard">Dashboard</button>
+    <button data-view="products">Products & stock</button>
+    <button data-view="sales">Record a sale</button>
+    <button data-view="history">Sales history</button>
+    <button data-view="deposits">Customer deposits</button>
+    <p class="tip">Tip: Set a low-stock level for every product so you can spot items that need reordering.</p>
+  </nav>
+
+<main>
+  <div id="message" class="message hidden" role="status"></div>
+<section id="dashboard" class="view">
+  <div class="heading">
+    <div>
+      <p class="eyebrow">
+        OVERVIEW
+      </p>
+      <h1>Dashboard</h1>
+        <p>A quick look at your hardware shop.</p>
+      </div>
+
+      <button id="refreshDashboard">
+        Refresh
+      </button>
+    </div>
+
+    <div class="stats">
+      <article>
+        <small>Different products</small>
+        <strong id="productCount">—</strong>
+      </article>
+      <article>
+        <small>Total units in stock</small>
+        <strong id="unitCount">—</strong>
+      </article>
+      <article>
+        <small>Low-stock products</small>
+        <strong id="lowCount">—</strong>
+      </article>
+      <article>
+        <small>Today's sales</small>
+        <strong id="todaySales">—</strong>
+        <small id="salesCount"></small>
+      </article>
+    </div>
+
+    <div class="card">
+      <h2>Items needing attention</h2>
+      <div id="lowTable">Loading…</div>
+    </div>
+ </section>
+
+<section id="products" class="view hidden">
+  <div class="heading">
+    <div>
+      <p class="eyebrow">INVENTORY</p>
+      <h1>Products & stock</h1>
+      <p>Add, edit, search and monitor products.</p>
+    </div>
+    <button class="primary" id="addProduct">+ Add product</button>
+  </div>
+  <div class="card">
+    <div class="filters">
+      <input id="search" placeholder="Search name, SKU, category, supplier">
+      <select id="category">
+        <option value="">All categories</option>
+        <option>Cement</option>
+        <option>Tools</option>
+        <option>Plumbing</option>
+        <option>Electrical</option>
+        <option>Paint</option>
+        <option>Timber</option>
+        <option>Roofing</option>
+        <option>Safety Equipment</option>
+        <option>Other</option>
+      </select>
+      <label><input type="checkbox" id="lowOnly"> Low stock only</label>
+      </div>
+      <div id="productsTable">Loading…</div>
+    </div>
+  </section>
+
+<section id="sales" class="view hidden">
+  <div class="heading">
+    <div>
+      <p class="eyebrow">CHECKOUT</p>
+      <h1>Record a sale</h1>
+      <p>Stock reduces when a sale is saved successfully.</p>
+    </div>
+  </div>
+  
+  <div class="columns">
+    <div class="card">
+      <h2>Add items</h2>
+      <form id="addCart" class="form">
+        <label>Product<select id="saleProduct" required></select></label>
+        <div class="pair">
+          <label>Quantity<input id="saleQty" type="number" min="1" step="1" value="1" required></label>
+          <button class="primary">Add item</button>
+        </div>
+        <div id="cart">
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Payment details</h2>
+      <form id="checkout" class="form">
+        <label>Customer name (optional)<input id="saleName" maxlength="150"></label>
+        <label>Customer phone (optional)<input id="salePhone" maxlength="30"></label>
+      <label>Payment method<select id="saleMethod"><option value="cash">Cash</option>
+          <option value="mpesa">M-Pesa</option>
+          <option value="bank">Bank</option>
+          <option value="credit">Credit / pay later</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+
+      <div class="total">Total<b id="cartTotal">KSh 0.00</b></div>
+      <button class="primary full">Complete sale </button>
+    </form>
+  </div>
+</div>
+</section>
+
+<section id="history" class="view hidden">
+  <div class="heading">
+    <div>
+      <p class="eyebrow">RECORDS</p>
+        <h1>Sales history</h1>
+        <p>Latest 100 recorded sales.</p>
+    </div>
+      <button id="refreshSales">Refresh</button>
+    </div>
+    <div class="card">
+      <div id="salesTable">Loading…</div>
+    </div>
+  </section>
+
+<section id="deposits" class="view hidden">
+  <div class="heading">
+    <div>
+      <p class="eyebrow">CUSTOMER PAYMENTS</p>
+      <h1>Customer deposits</h1>
+      <p>Track items customers are paying for before collection.</p>
+    </div>
+    <button class="primary" id="newDeposit">+ New deposit</button>
+  </div>
+  <div class="card">
+    <div id="depositsTable">Loading…</div>
+  </div>
+</section>
+
+<!--p class="warning">Starter version: before using this for real shop operations, add staff logins, permissions, backups and secure hosting.</p-->
+</main>
+</div>
+
+<dialog id="productDialog">
+  <form id="productForm" class="dialogForm">
+    <div class="dialogHead">
+      <h2 id="productTitle">Add product</h2>
+      <button type="button" data-close="productDialog">✕</button>
+    </div>
+    <input id="productId" type="hidden">
+    <label>Product name *<input id="pName" required maxlength="150"></label>
+    <div class="pair">
+    <label>SKU / code *<input id="pSku" required maxlength="50"></label>
+    <label>Category *<select id="pCategory" required>
+      <option value="">Choose</option>
+      <option>Cement</option>
+      <option>Tools</option>
+      <option>Plumbing</option>
+      <option>Electrical</option>
+      <option>Paint</option>
+      <option>Timber</option>
+      <option>Roofing</option>
+      <option>Safety Equipment</option>
+      <option>Other</option>
+    </select>
+  </label>
+</div>
+<label>Supplier<input id="pSupplier" maxlength="150"></label>
+
+<div class="pair">
+  <label>Purchase price (KSh) *<input id="pPurchase" type="number" min="0" step=".01" required></label>
+  <label>Selling price (KSh) *<input id="pSelling" type="number" min="0" step=".01" required></label>
+</div>
+
+<div class="pair">
+  <label>Quantity *<input id="pQty" type="number" min="0" step="1" required></label>
+  <label>Low-stock level *<input id="pLow" type="number" min="0" step="1" value="5" required></label>
+</div>
+
+<small>Changing quantity records a stock adjustment.</small>
+
+<div class="actions">
+  <button type="button" data-close="productDialog">Cancel</button>
+  <button class="primary">Save product</button>
+</div>
+</form>
+</dialog>
+
+<dialog id="depositDialog">
+  <form id="depositForm" class="dialogForm">
+    <div class="dialogHead">
+      <h2>New customer deposit</h2>
+      <button type="button" data-close="depositDialog">✕</button>
+    </div>
+
+    <label>Customer name *<input id="dName" required></label>
+    <label>Phone<input id="dPhone"></label>
+    <label>Item being paid for *<input id="dItem" required placeholder="e.g. 20 bags of cement"></label>
+
+    <div class="pair">
+      <label>Agreed amount (KSh) *<input id="dAgreed" type="number" min=".01" step=".01" required> </label>
+      <label>Initial payment<input id="dPaid" type="number" min="0" step=".01" value="0" required></label>
+    </div>
+    <label>Payment method<select id="dMethod">
+      <option value="cash">Cash</option>
+      <option value="mpesa">M-Pesa</option>
+      <option value="bank">Bank</option>
+      <option value="other">Other</option>
+    </select>
+  </label>
+
+  <label>Notes<textarea id="dNotes" rows="2">
+  </textarea>
+</label>
+<div class="actions">
+  <button type="button" data-close="depositDialog">Cancel</button>
+  <button class="primary">Save deposit</button>
+</div>
+</form>
+</dialog>
+
+<dialog id="paymentDialog">
+  <form id="paymentForm" class="dialogForm">
+    <div class="dialogHead">
+      <h2>Add deposit payment</h2>
+      <button type="button" data-close="paymentDialog">✕</button>
+    </div>
+    <input id="payId" type="hidden">
+    <p id="payBalance"></p>
+    <label>Amount (KSh) *<input id="payAmount" type="number" min=".01" step=".01" required>
+    </label>
+    <label>Payment method<select id="payMethod">
+      <option value="cash">Cash</option>
+      <option value="mpesa">M-Pesa</option>
+      <option value="bank">Bank</option>
+      <option value="other">Other</option>
+    </select>
+  </label>
+
+  <label>Reference code<input id="payRef"></label>
+  <div class="actions">
+    <button type="button" data-close="paymentDialog">Cancel</button>
+    <button class="primary">Save payment</button>
+  </div>
+</form>
+</dialog>
+<dialog id="receiptDialog">
+  <div class="dialogForm">
+    <div class="dialogHead">
+      <h2>Sale completed</h2>
+      <button type="button" data-close="receiptDialog">✕</button>
+    </div>
+    <div id="receipt">
+    </div>
+    <div class="actions">
+      <button class="primary" type="button" data-close="receiptDialog">Done</button>
+    </div>
+  </div>
+</dialog>
+</body>
+</html>
