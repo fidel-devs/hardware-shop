@@ -459,19 +459,17 @@ dialog::backdrop{
       display:block
     }
 
-    nav{
-      display:flex;
-      overflow-x:auto;
-      position:sticky;
-      top:62px;z-index:4;
-      padding:7px;
-      border-right:0;
-      border-bottom:1px solid #e0e8e3;
-      gap:4px;
-      top:70px;
-      height:calc(100vh - 70px);
-      overflow-y:auto;
-    }
+  nav{
+    position:fixed;
+    top:70px;
+    left:0;
+    width:220px;
+    height:calc(100vh - 70px);
+    overflow-y:auto;
+  }
+  main{
+    grid-column:2;
+  }
 
 
     nav button{
