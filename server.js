@@ -167,7 +167,8 @@ app.use((err,req,res,next)=>{console.error("API error:",err);if(res.headersSent)
 module.exports = app;
 
 if (require.main === module){
-  app.listen(PORT, () => {
+  const PORT =process.env.PORT || 10000;
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Running on ${PORT}`);
   });
 }
