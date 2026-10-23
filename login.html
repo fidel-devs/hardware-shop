@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hardware - Login</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      background: #0f1410;
+      font-family: Inter, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+    .card {
+      background: #1e1e1e;
+      width: 100%;
+      max-width: 400px;
+      padding: 35px;
+      border-radius: 20px;
+      border: 1px solid rgba(72,199,142,.2);
+      box-shadow: 0 0 40px rgba(72,199,142,.15);
+    }
+    .logo {
+      width: 70px;
+      height: 70px;
+      background: #3aa87a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 900;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 20px rgba(72,199,142,.5);
+    }
+    h1 { text-align: center; margin: 0; font-size: 25px; }
+    .sub { text-align: center; color: #7a9a8a; margin: 10px 0 25px; }
+    label { font-size: 14px; font-weight: 600; display: block; }
+    input {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0 18px;
+      border-radius: 10px;
+      background: #111;
+      border: 1px solid #2a3a32;
+      color: white;
+      font: inherit;
+    }
+    input:focus { outline: 2px solid #3aa87a; outline-offset: 2px; }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #1f4d33;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: #2a6a45; }
+    button:disabled { opacity: .65; cursor: wait; }
+    .foot { text-align: center; color: #6a8a7a; font-size: 13px; margin-top: 18px; }
+    #msg { color: #ff6b6b; text-align: center; min-height: 20px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo" aria-hidden="true">H</div>
+    <h1>Hardware Shop</h1>
+    <div class="sub">Admin Login</div>
+
+    <form id="loginForm">
+      <label for="user">Username</label>
+      <input id="user" name="username" type="text" placeholder="Enter your username"
+             value="admin" autocomplete="username" required>
+
+      <label for="pass">Password</label>
+      <input id="pass" name="password" type="password" placeholder="Enter your password"
+             autocomplete="current-password" required>
+
+      <button id="loginButton" type="submit">Login to Dashboard</button>
+      <p id="msg" role="alert" aria-live="polite"></p>
+    </form>
+
+    <div class="foot">Secure Access &bull; Kerugoya</div>
+  </main>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const message = document.getElementById('msg');
+    const button = document.getElementById('loginButton');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      message.textContent = '';
+
+      const username = document.getElementById('user').value.trim();
+      const password = document.getElementById('pass').value;
+
+      if (!username || !password) {
+        message.textContent = 'Enter both your username and password.';
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Signing in...';
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ username, password })
+        });
+
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error('The server returned an unexpected response. Check your server setup.');
+        }
+
+        if (!response.ok) {
+          message.textContent = data.message || 'Login failed. Check your username and password.';
+          return;
+        }
+
+        // Supports either a server-managed session or a token-based API.
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+        }
+
+        window.location.href = data.redirect || '/';
+      } catch (error) {
+        message.textContent = error.message === 'Failed to fetch'
+          ? 'Cannot reach the server. Make sure the backend is running.'
+          : (error.message || 'Something went wrong. Please try again.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Login to Dashboard';
+      }
+    });
+  </script>
+</body>
+</html>
