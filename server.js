@@ -6,7 +6,10 @@ const crypto = require("crypto");
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 app.use(express.json({limit:"1mb"}));
-app.use(express.static(__dirname,));
+app.use(express.static(path.join(__dirname, "public")));
+app.get('/login.html', (req,res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
 const db = mysql.createPool({
   host:process.env.DB_HOST || "localhost",
