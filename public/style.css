@@ -54,9 +54,7 @@ nav{
   background:white;
   border-right:1px solid #e0e8e3;
   padding:22px 12px;
-  position: sticky;
-  top: 70px;
-  align-self: start;
+
 }
 
 nav button{
@@ -539,4 +537,4 @@ dialog::backdrop{
     .dialogForm{
       padding:18px
     }
-  }
+  
