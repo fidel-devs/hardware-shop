@@ -47,12 +47,16 @@ header{
   display:grid;
   grid-template-columns:220px minmax(0,1fr);
   min-height:calc(100vh - 70px)
+  
 }
 
 nav{
   background:white;
   border-right:1px solid #e0e8e3;
-  padding:22px 12px
+  padding:22px 12px;
+  position: sticky;
+  top: 0;
+  align-self: start;
 }
 
 nav button{
