@@ -48,6 +48,23 @@ app.get("/api/products",async(req,res,next)=>{
   const [rows]=await db.query(sql,args);res.json(rows);
  }catch(e){next(e);}
 });
+
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'Admin@123'
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  console.log('Login attemp:', username);
+
+  if(username === ADMIN_USER && password === ADMIN_PASS){
+    return res.json({
+      message: 'login successful',
+      redirect: '/index.html'
+    });
+  }
+  return res.status(401).json({message: 'invalid username or passwaord'});
+});
+
 app.post("/api/products",async(req,res,next)=>{
  try{
   const name=text(req.body.name),sku=text(req.body.sku,50).toUpperCase(),category=text(req.body.category,100);
