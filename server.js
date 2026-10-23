@@ -53,17 +53,14 @@ const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'Admin@123'
 
 app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  console.log('Login attemp:', username);
-
+  const username = req.body.username?.trim();
+  const password = req.body.password?.trim();
   if(username === ADMIN_USER && password === ADMIN_PASS){
-    return res.json({
-      message: 'login successful',
-      redirect: '/index.html'
-    });
+    return res.json({ message: 'ok' });
   }
-  return res.status(401).json({message: 'invalid username or passwaord'});
-});
+  return res.status(401).json({message: 'Wrong password' });
+})
+
 
 app.post("/api/products",async(req,res,next)=>{
  try{
