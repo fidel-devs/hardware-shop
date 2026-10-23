@@ -458,18 +458,16 @@ dialog::backdrop{
     .layout{
       display:block
     }
+    nav{
+      background:white;
+      border-right:1px solid #e0e8e3;
+      padding:22px 12px;
+      position: sticky;
+      top: 70px; /* changed from 0 */
+      align-self: start;
+    }
 
-  nav{
-    position:fixed;
-    top:70px;
-    left:0;
-    width:220px;
-    height:calc(100vh - 70px);
-    overflow-y:auto;
-  }
-  main{
-    grid-column:2;
-  }
+
 
 
     nav button{
