@@ -168,6 +168,6 @@ module.exports = app;
 
 if (require.main === module){
   app.listen(PORT, () => {
-    Cconsole.log(`Running on ${PORT}`);
+    console.log(`Running on ${PORT}`);
   });
 }
