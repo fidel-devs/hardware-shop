@@ -86,6 +86,13 @@ async function initUsers(){
     await db.query("INSERT INTO users(username,password_hash,role) VALUES(?,?,'admin')",[u,hashPassword(p)]);
     console.log(`Created first login user "${u}".`+(process.env.ADMIN_PASS?"":" Using the default password - set ADMIN_USER and ADMIN_PASS in .env before first run to choose your own."));
   }
+      
+  if(process.env.RESET_ADMIN==="true" && process.env.ADMIN_USER && process.env.ADMIN_PASS){
+    await db.query("DELETE FROM users");
+    await db.query("INSERT INTO users(username,password_hash,role) VALUES(?,?,'admin')",[process.env.ADMIN_USER,hashPassword(process.env.ADMIN_PASS)]);
+    console.log(`Login reset. User is now "${process.env.ADMIN_USER}".`);
+  }
+
 }
 
 // ---- public routes (no login needed) ----
