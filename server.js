@@ -5,11 +5,8 @@ const mysql = require("mysql2/promise");
 const crypto = require("crypto");
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+app.set("trust proxy", 1);
 app.use(express.json({limit:"1mb"}));
-app.use(express.static(path.join(__dirname, "public")));
-app.get('/login.html', (req,res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
 
 const db = mysql.createPool({
   host:process.env.DB_HOST || "localhost",
@@ -26,10 +23,116 @@ const qtyOK = n => Number.isInteger(n) && n>=0 && n<=100000000;
 const fail = (res,msg,status=400) => res.status(status).json({error:msg});
 const receipt = () => "HS-"+Date.now().toString(36).toUpperCase()+"-"+crypto.randomBytes(2).toString("hex").toUpperCase();
 
+/* ---------------- AUTH ---------------- */
+const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex");
+if(!process.env.SESSION_SECRET) console.warn("WARNING: SESSION_SECRET is not set. Everyone is logged out whenever the server restarts. Set it in your .env / hosting settings.");
+const SESSION_HOURS = 12;
+const COOKIE = "hs_session";
+const b64 = s => Buffer.from(s).toString("base64url");
+const sign = data => crypto.createHmac("sha256", SESSION_SECRET).update(data).digest("base64url");
+function makeToken(user){
+  const body = b64(JSON.stringify({u:user.username, r:user.role, exp:Date.now()+SESSION_HOURS*3600*1000}));
+  return body+"."+sign(body);
+}
+function readToken(token){
+  if(typeof token!=="string") return null;
+  const [body,sig] = token.split(".");
+  if(!body||!sig) return null;
+  const a = Buffer.from(sig), b = Buffer.from(sign(body));
+  if(a.length!==b.length || !crypto.timingSafeEqual(a,b)) return null;
+  try{
+    const d = JSON.parse(Buffer.from(body,"base64url").toString());
+    return d.exp>Date.now() ? d : null;
+  }catch{ return null; }
+}
+function getCookie(req,name){
+  const m = (req.headers.cookie||"").split(";").map(s=>s.trim()).find(s=>s.startsWith(name+"="));
+  return m ? decodeURIComponent(m.slice(name.length+1)) : null;
+}
+const hashPassword = pw => {
+  const salt = crypto.randomBytes(16).toString("hex");
+  return salt+":"+crypto.scryptSync(pw,salt,64).toString("hex");
+};
+const checkPassword = (pw,stored) => {
+  const [salt,hash] = String(stored||"").split(":");
+  if(!salt||!hash) return false;
+  const test = crypto.scryptSync(pw,salt,64), known = Buffer.from(hash,"hex");
+  return known.length===test.length && crypto.timingSafeEqual(test,known);
+};
+
+// Simple brute-force protection: 5 wrong attempts => locked for 15 minutes (per IP)
+const attempts = new Map();
+const LOCK_MS = 15*60*1000;
+function isLocked(ip){
+  const a = attempts.get(ip);
+  if(!a) return false;
+  if(a.until && a.until>Date.now()) return true;
+  if(a.until && a.until<=Date.now()) attempts.delete(ip);
+  return false;
+}
+function recordFail(ip){
+  const a = attempts.get(ip) || {count:0};
+  a.count++;
+  if(a.count>=5){ a.until = Date.now()+LOCK_MS; a.count = 0; }
+  attempts.set(ip,a);
+}
+
+async function initUsers(){
+  await db.query("CREATE TABLE IF NOT EXISTS users(id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL, role VARCHAR(20) NOT NULL DEFAULT 'admin', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+  const [[c]] = await db.query("SELECT COUNT(*) n FROM users");
+  if(!c.n){
+    const u = process.env.ADMIN_USER || "admin";
+    const p = process.env.ADMIN_PASS || "Admin@123";
+    await db.query("INSERT INTO users(username,password_hash,role) VALUES(?,?,'admin')",[u,hashPassword(p)]);
+    console.log(`Created first login user "${u}".`+(process.env.ADMIN_PASS?"":" Using the default password - set ADMIN_USER and ADMIN_PASS in .env before first run to choose your own."));
+  }
+}
+
+// ---- public routes (no login needed) ----
 app.get("/api/health",async(req,res)=>{
  try { await db.query("SELECT 1"); res.json({status:"ok",database:"connected"}); }
  catch(e){res.status(503).json({status:"error",database:"unavailable"});}
 });
+app.get("/login.html",(req,res)=>{
+  if(readToken(getCookie(req,COOKIE))) return res.redirect("/");
+  res.sendFile(path.join(__dirname,"public","login.html"));
+});
+app.post("/api/login",async(req,res)=>{
+  const ip = req.ip;
+  if(isLocked(ip)) return res.status(429).json({message:"Too many failed attempts. Try again in 15 minutes."});
+  const username = text(req.body.username,50);
+  const password = typeof req.body.password==="string" ? req.body.password : "";
+  if(!username||!password) return res.status(400).json({message:"Enter both your username and password."});
+  try{
+    const [rows] = await db.query("SELECT * FROM users WHERE username=?",[username]);
+    if(!rows.length || !checkPassword(password,rows[0].password_hash)){
+      recordFail(ip);
+      return res.status(401).json({message:"Wrong username or password."});
+    }
+    attempts.delete(ip);
+    res.setHeader("Set-Cookie",`${COOKIE}=${encodeURIComponent(makeToken(rows[0]))}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${SESSION_HOURS*3600}${req.secure?"; Secure":""}`);
+    res.json({message:"ok",redirect:"/"});
+  }catch(e){
+    console.error("Login error:",e);
+    res.status(500).json({message:"Server error. Check the terminal for details."});
+  }
+});
+app.post("/api/logout",(req,res)=>{
+  res.setHeader("Set-Cookie",`${COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${req.secure?"; Secure":""}`);
+  res.json({message:"ok"});
+});
+
+// ---- everything below this line requires login ----
+app.use((req,res,next)=>{
+  const session = readToken(getCookie(req,COOKIE));
+  if(session){ req.user = session; return next(); }
+  if(req.path.startsWith("/api/")) return res.status(401).json({error:"Please log in.",message:"Please log in."});
+  return res.redirect("/login.html");
+});
+app.use(express.static(path.join(__dirname, "public")));
+app.get("/api/me",(req,res)=>res.json({username:req.user.u,role:req.user.r}));
+
+/* ---------------- APP ROUTES ---------------- */
 app.get("/api/dashboard",async(req,res,next)=>{
  try{
   const [[p]]=await db.query("SELECT COUNT(*) productCount,COALESCE(SUM(quantity),0) totalUnits,COALESCE(SUM(quantity*purchase_price),0) stockCostValue,SUM(CASE WHEN quantity<=low_stock_level THEN 1 ELSE 0 END) lowStockCount FROM products");
@@ -48,19 +151,6 @@ app.get("/api/products",async(req,res,next)=>{
   const [rows]=await db.query(sql,args);res.json(rows);
  }catch(e){next(e);}
 });
-
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'Admin@123'
-
-app.post('/api/login', (req, res) => {
-  const username = req.body.username?.trim();
-  const password = req.body.password?.trim();
-  if(username === ADMIN_USER && password === ADMIN_PASS){
-    return res.json({ message: 'ok' });
-  }
-  return res.status(401).json({message: 'Wrong password' });
-})
-
 
 app.post("/api/products",async(req,res,next)=>{
  try{
@@ -177,8 +267,8 @@ app.patch("/api/deposits/:id/status",async(req,res,next)=>{
 app.use("/api",(req,res)=>res.status(404).json({error:"API route not found."}));
 app.use((err,req,res,next)=>{console.error("API error:",err);if(res.headersSent)return next(err);res.status(500).json({error:"Server error. Check the terminal for details."});});
 (async()=>{
-try{await db.query("SELECT 1");console.log("MySQL database connected.");}
-catch(e){console.error("Cannot connect to MySQL. Check MySQL is running and .env settings.");console.error(e.message);}
+try{await db.query("SELECT 1");console.log("MySQL database connected.");await initUsers();}
+catch(e){console.error("Cannot connect to MySQL or set up the users table. Check MySQL is running and .env settings.");console.error(e.message);}
 })();
 
 module.exports = app;

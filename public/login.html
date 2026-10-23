@@ -79,7 +79,7 @@
     <form id="loginForm">
       <label for="user">Username</label>
       <input id="user" name="username" type="text" placeholder="Enter your username"
-             value="admin" autocomplete="username" required>
+             autocomplete="username" required autofocus>
 
       <label for="pass">Password</label>
       <input id="pass" name="password" type="password" placeholder="Enter your password"
@@ -130,12 +130,6 @@
         if (!response.ok) {
           message.textContent = data.message || 'Login failed. Check your username and password.';
           return;
-        }
-
-        // Supports either a server-managed session or a token-based API.
-        localStorage.setItem('isLoggedIn', 'true');
-        if (data.token) {
-          localStorage.setItem('isLoggedIn', 'true');
         }
 
         window.location.href = data.redirect || '/';
