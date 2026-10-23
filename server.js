@@ -159,10 +159,10 @@ app.patch("/api/deposits/:id/status",async(req,res,next)=>{
 });
 app.use("/api",(req,res)=>res.status(404).json({error:"API route not found."}));
 app.use((err,req,res,next)=>{console.error("API error:",err);if(res.headersSent)return next(err);res.status(500).json({error:"Server error. Check the terminal for details."});});
-//(async()=>{
- //try{await db.query("SELECT 1");console.log("MySQL database connected.");}
- //catch(e){console.error("Cannot connect to MySQL. Check MySQL is running and .env settings.");console.error(e.message);}
-//})();
+(async()=>{
+try{await db.query("SELECT 1");console.log("MySQL database connected.");}
+catch(e){console.error("Cannot connect to MySQL. Check MySQL is running and .env settings.");console.error(e.message);}
+})();
 
 module.exports = app;
 
