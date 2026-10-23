@@ -467,7 +467,10 @@ dialog::backdrop{
       padding:7px;
       border-right:0;
       border-bottom:1px solid #e0e8e3;
-      gap:4px
+      gap:4px;
+      top:70px;
+      height:calc(100vh - 70px);
+      overflow-y:auto;
     }
 
 
