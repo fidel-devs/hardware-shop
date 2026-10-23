@@ -458,25 +458,26 @@ dialog::backdrop{
     .layout{
       display:block
     }
-    nav{
-      background:white;
-      border-right:1px solid #e0e8e3;
-      padding:22px 12px;
-      position: sticky;
-      top: 70px; /* changed from 0 */
-      align-self: start;
+
+   nav{
+      display:flex;
+      overflow-x:auto;
+      position:sticky;
+      top:62px;z-index:4;
+      padding:7px;
+      border-right:0;
+      border-bottom:1px solid #e0e8e3;
+      gap:4px
     }
 
-
-
-
-    nav button{
-      width:auto;
-      flex:0 0 auto;
-      white-space:nowrap;
-      margin:0;
-      padding:10px;
-      font-size:11px
+   nav button{
+    width:auto;
+    flex:0 0 auto;
+    white-space:nowrap;
+    margin:0;
+    padding:10px;
+    font-size:11px
+   }
     }
 
     .tip{
