@@ -133,8 +133,9 @@
         }
 
         // Supports either a server-managed session or a token-based API.
+        localStorage.setItem('isLoggedIn', 'true');
         if (data.token) {
-          localStorage.setItem('token', data.token);
+          localStorage.setItem('isLoggedIn', 'true');
         }
 
         window.location.href = data.redirect || '/';
